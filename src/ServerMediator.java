@@ -7,8 +7,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerMediator {
-    private final int tcpDiscussionPort = 9000;
-    private final int tcpPunchPort = 9001;
+    private final int tcpDiscussionPort = 4500;
+    private final int tcpPunchPort = 4501;
 
     private BufferedReader inDiscussionA, inPunchA;
     private PrintWriter outDiscussionA, outPunchA;
@@ -67,7 +67,7 @@ public class ServerMediator {
 
                 System.out.println("Waiting for Client A punch");
                 clientAPunch = socketPunch.accept();
-                clientAIp = ((InetSocketAddress)clientAPunch.getRemoteSocketAddress()).getAddress().getHostAddress().trim();
+                clientAIp = ((InetSocketAddress)clientAPunch.getRemoteSocketAddress()).getAddress().getHostAddress();
                 clientAPortLocal = String.valueOf(clientAPunch.getPort());
                 clientAPort = String.valueOf(clientAPunch.getLocalPort());
                 System.out.println("Client A punch " + clientAPunch.getInetAddress() + " " + clientAPunch.getPort());
@@ -76,7 +76,7 @@ public class ServerMediator {
 
                 System.out.println("Waiting for Client B punch");
                 clientBPunch = socketPunch.accept();
-                clientBIp = ((InetSocketAddress)clientBPunch.getRemoteSocketAddress()).getAddress().getHostAddress().trim();
+                clientBIp = ((InetSocketAddress)clientBPunch.getRemoteSocketAddress()).getAddress().getHostAddress();
                 clientBPortLocal = String.valueOf(clientBPunch.getPort());
                 clientBPort = String.valueOf(clientBPunch.getLocalPort());
                 System.out.println("Client 2 punch " + clientBPunch.getInetAddress() + " " + clientBPunch.getPort());
@@ -91,9 +91,11 @@ public class ServerMediator {
     }
 
     public void proceedInfosExchange() throws IOException {
+        System.out.println("Start exchanging process infos...");
         while (true) {
             String message = inPunchA.readLine();
-            if (message.trim().equals("CLIENT_RESP:READY_TO_PUNCH")) {
+            System.out.println("client A: " + message);
+            if (message.equals("CLIENT_RESP:READY_TO_PUNCH")) {
                 System.out.println("Initial punch message from CLIENT A: " + message);
                 break;
             }
@@ -102,7 +104,8 @@ public class ServerMediator {
 
         while (true) {
             String message = inPunchB.readLine();
-            if (message.trim().equals("CLIENT_RESP:READY_TO_PUNCH")) {
+            System.out.println("client B: " + message);
+            if (message.equals("CLIENT_RESP:READY_TO_PUNCH")) {
                 System.out.println("Initial punch message from CLIENT B: " + message);
                 break;
             }
@@ -121,7 +124,7 @@ public class ServerMediator {
 
             while (true) {
                 String message = inPunchA.readLine();
-                if (message.trim().equals("CLIENT_RESP:PUNCH_INFO_RECEIVED")) {
+                if (message.equals("CLIENT_RESP:PUNCH_INFO_RECEIVED")) {
                     System.out.println("Client A received punch ip and port!");
                     clientAPunchReceived = true;
                     break;
@@ -130,7 +133,7 @@ public class ServerMediator {
 
             while (true) {
                 String message = inPunchB.readLine();
-                if (message.trim().equals("CLIENT_RESP:PUNCH_INFO_RECEIVED")) {
+                if (message.equals("CLIENT_RESP:PUNCH_INFO_RECEIVED")) {
                     System.out.println("Client B received punch ip and port!");
                     clientBPunchReceived = true;
                     break;

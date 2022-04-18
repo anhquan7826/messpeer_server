@@ -92,7 +92,7 @@ public class Client extends Thread {
             try {
                 String message = getMessage();
                 if (message.startsWith("GROUP_CHAT_CREATE")) {
-                    // TODO: query database
+                    // TODO: Create group chat
                 } else if (message.startsWith("GROUP_CHAT_ADD")) {
                     // TODO: query database
                 } else if (message.startsWith("GROUP_CHAT_KICK")) {

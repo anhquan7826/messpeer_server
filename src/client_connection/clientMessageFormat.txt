@@ -1,0 +1,12 @@
+// dùng khi client mới thiết lập kết nối đến server
+INITIAL_MESSAGE:<username> <password_hash>
+
+// dùng khi client muốn quản lí group chat
+GROUP_CHAT_CREATE:<name>
+GROUP_CHAT_ADD:<username>
+GROUP_CHAT_KICK:<username>
+GROUP_CHAT_CHANGE_HOST:<username>
+GROUP_CHAT_DELETE:<group_chat_id>
+
+// dùng hi client gửi tin nhắn
+SEND_MESSAGE:<group_chat_id> <message_object>

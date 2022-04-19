@@ -83,7 +83,7 @@ public class DbObject {
         try {
             DbObject dbObject = new DbObject();
             System.out.println(dbObject.userExistsInGroup("1lP2AtiPbyYigH9X2fCH", "ligma"));
-            addUserToGroup("1lP2AtiPbyYigH9X2fCH", "ligma", true);
+            dbObject.addUserToGroup("1lP2AtiPbyYigH9X2fCH", "ligma", true);
         } catch (SQLException e) {
             e.printStackTrace();
         }

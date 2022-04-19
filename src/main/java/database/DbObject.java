@@ -1,12 +1,12 @@
 package database;
 
-import utils.*;
+import utils.IDGenerator;
 
 import java.sql.*;
 
 public class DbObject {
-    Statement statement;
-
+    private static Statement statement;
+    
     public DbObject() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/messpear";
         String user = "root";
@@ -35,6 +35,18 @@ public class DbObject {
     }
 
     public boolean addUserToGroup(String group_id, String added_username, char is_host) throws SQLException {
+        // Check is_host
+        if (is_host != 'T' && is_host != 'F') {
+            System.out.println("Error: is_host must be 'T' or 'F'");
+            return false;
+        }
+
+        // Check if user exists
+        if (userExistsInGroup(group_id, added_username)) {
+            System.out.println("Error: User already exists in the group");
+            return false;
+        }
+
         // Write to database
         String query = "INSERT INTO group_user (group_id, username, is_host) VALUES ('" + group_id + "', '" + added_username + "', '" + is_host + "')";
 
@@ -47,32 +59,36 @@ public class DbObject {
         return true; //true if query success, else false
     }
 
-    // Test
-    public static void main(String[] args) throws SQLException {
-        DbObject db = new DbObject();
-        db.createGroup("Nhom cua tao la nhat", "ligma");
-        String members[] = {"cisco", "shitco", "nu", "sugma"};
-        db.addMembersToGroup("Nhom cua tao la nhat", members);
-    }
-
-    // Add members to group
-    void addMembersToGroup(String groupname, String[] members) throws SQLException {
-        String groupID = getGroupID(groupname);
-        for (String member : members) {
-            addUserToGroup(groupID, member, 'F');
-        }
-    }
-
-    private String getGroupID(String groupname) {
-        String query = "SELECT group_id FROM group_name WHERE group_name = '" + groupname + "'";
+    // Utility function to check if user exists in group
+    public boolean userExistsInGroup(String group_id, String username) throws SQLException {
+        String query = "SELECT * FROM group_user WHERE group_id = '"
+                + group_id + "' AND username = '" + username + "'";
         try {
-            ResultSet rs = statement.executeQuery(query);
-            if (rs.next()) {
-                return rs.getString("group_id");
+            String resultString = "";
+            ResultSet result = statement.executeQuery(query);
+
+            if (result.next()) {
+                resultString = result.getString("username");
+                if (resultString.equals(username)) {
+                    return true;
+                }
+            } else {
+                return false;
             }
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
+            return false;
         }
-        return null;
+
+        return false;
+    }
+
+    public static void main(String[] args) {
+        try {
+            DbObject dbObject = new DbObject();
+            System.out.println(dbObject.userExistsInGroup("1lP2AtiPbyYigH9X2fCH", "ligma"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

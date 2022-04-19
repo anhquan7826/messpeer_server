@@ -23,7 +23,7 @@ public class DbObject {
 
         try {
             statement.executeUpdate(createGroupQuery);
-            if (!addUserToGroup(groupID, username, 'T')) {
+            if (!addUserToGroup(groupID, username, true)) {
                 System.out.println("Error: Failed to add host to group");
                 return false;
             }
@@ -34,12 +34,8 @@ public class DbObject {
         return true; //true if query success, else false
     }
 
-    public boolean addUserToGroup(String group_id, String added_username, char is_host) throws SQLException {
-        // Check is_host
-        if (is_host != 'T' && is_host != 'F') {
-            System.out.println("Error: is_host must be 'T' or 'F'");
-            return false;
-        }
+    public boolean addUserToGroup(String group_id, String added_username, boolean is_hostBool) throws SQLException {
+        char is_host = is_hostBool ? 'T' : 'F';
 
         // Check if user exists
         if (userExistsInGroup(group_id, added_username)) {
@@ -87,6 +83,7 @@ public class DbObject {
         try {
             DbObject dbObject = new DbObject();
             System.out.println(dbObject.userExistsInGroup("1lP2AtiPbyYigH9X2fCH", "ligma"));
+            addUserToGroup("1lP2AtiPbyYigH9X2fCH", "ligma", true);
         } catch (SQLException e) {
             e.printStackTrace();
         }

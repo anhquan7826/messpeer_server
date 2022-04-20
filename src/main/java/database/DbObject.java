@@ -3,9 +3,15 @@ package database;
 import utils.IDGenerator;
 
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class DbObject {
     private static Statement statement;
+
+    private DateFormat dateFormat;
+    private Calendar calendar;
 
     /** Constructor. */
     public DbObject() throws SQLException {
@@ -14,6 +20,7 @@ public class DbObject {
         String password = "";
         Connection connection = DriverManager.getConnection(url, user, password);
         statement = connection.createStatement();
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     }
 
     ///////////////// FUNCTIONAL METHODS /////////////////
@@ -114,6 +121,20 @@ public class DbObject {
         return true;
     }
 
+    /** Functional method: Send message to group. */
+    public boolean sendMessageToGroup(String user_id, String group_id, String message_content) throws SQLException {
+        String currentTime = getCurrentTime();
+        String query = "INSERT INTO message (user_id, group_id, message_content, created_date) "
+                + "VALUES ('" + user_id + "', '" + group_id + "', '" + message_content + "', '" + currentTime + "')";
+        try {
+            statement.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
     ///////////////// UTILITY METHODS /////////////////
 
     /** Utility method: Check if a certain user exists in a group. */
@@ -184,6 +205,12 @@ public class DbObject {
         }
     }
 
+    // Utility method: Get current time
+    public String getCurrentTime() {
+        calendar = Calendar.getInstance();
+        return dateFormat.format(calendar.getTime());
+    }
+
     // TODO: Utility method to remove X marked users
     // TODO: Utility method to remove userless groups
     // TODO: Utility method to get group_id
@@ -224,7 +251,7 @@ public class DbObject {
 //
 //            // Change host to sugma
 //            dbObject.changeGroupHost(id, "sugma");
-
+            dbObject.sendMessageToGroup("ligma", id, "Hello");
         } catch (SQLException e) {
             e.printStackTrace();
         }

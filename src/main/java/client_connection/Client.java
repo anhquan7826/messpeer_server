@@ -98,7 +98,7 @@ public class Client extends Thread {
                 } else if (message.startsWith("GROUP_CHAT_KICK")) {
                     //// TODO: Kick user from group chat (done)
                 } else if (message.startsWith("GROUP_CHAT_CHANGE_HOST")) {
-                    // TODO: query database
+                    // TODO: Change group chat host (done)
                 } else if (message.startsWith("GROUP_CHAT_DELETE")) {
                     // TODO: Delete group chat (done)
                 } else if (message.startsWith("SEND_MESSAGE")) {

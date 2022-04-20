@@ -122,10 +122,10 @@ public class DbObject {
     }
 
     /** Functional method: Send message to group. */
-    public boolean sendMessageToGroup(String user_id, String group_id, String message_content) throws SQLException {
+    public boolean sendMessageToGroup(String group_id, String user_id, String message_content) throws SQLException {
         String currentTime = getCurrentTime();
-        String query = "INSERT INTO message (user_id, group_id, message_content, created_date) "
-                + "VALUES ('" + user_id + "', '" + group_id + "', '" + message_content + "', '" + currentTime + "')";
+        String query = "INSERT INTO message (group_id, user_id, message_content, created_date) "
+                + "VALUES ('" + group_id + "', '" + user_id + "', '" + message_content + "', '" + currentTime + "')";
         try {
             statement.executeUpdate(query);
         } catch (SQLException e) {

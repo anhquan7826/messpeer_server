@@ -6,7 +6,8 @@ import java.sql.*;
 
 public class DbObject {
     private static Statement statement;
-    
+
+    /** Constructor. */
     public DbObject() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/messpear";
         String user = "root";
@@ -15,25 +16,30 @@ public class DbObject {
         statement = connection.createStatement();
     }
 
+    ///////////////// FUNCTIONAL METHODS /////////////////
+
+    /** Functional method: Create a Group. */
     public boolean createGroup(String groupname, String username) throws SQLException {
         String groupID = IDGenerator.generate(20);
-
-        // Write to database
-        String createGroupQuery = "INSERT INTO group_name (group_id, group_name) VALUES ('" + groupID + "', '" + groupname + "')";
+        String createGroupQuery = "INSERT INTO group_name (group_id, group_name) " +
+                "VALUES ('" + groupID + "', '" + groupname + "')";
 
         try {
             statement.executeUpdate(createGroupQuery);
             if (!addUserToGroup(groupID, username, true)) {
                 System.out.println("Error: Failed to add host to group");
+                System.out.println("Deleting failed-to-create group...");
+                removeGroup(groupID);
                 return false;
             }
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
             return false;
         }
-        return true; //true if query success, else false
+        return true;
     }
 
+    /** Functional method: Add a user to a group. */
     public boolean addUserToGroup(String group_id, String added_username, boolean is_hostBool) throws SQLException {
         char is_host = is_hostBool ? 'T' : 'F';
 
@@ -43,8 +49,8 @@ public class DbObject {
             return false;
         }
 
-        // Write to database
-        String query = "INSERT INTO group_user (group_id, username, is_host) VALUES ('" + group_id + "', '" + added_username + "', '" + is_host + "')";
+        String query = "INSERT INTO group_user (group_id, username, is_host) " +
+                "VALUES ('" + group_id + "', '" + added_username + "', '" + is_host + "')";
 
         try {
             statement.executeUpdate(query);
@@ -52,15 +58,51 @@ public class DbObject {
             System.out.println("Error: " + e.getMessage());
             return false;
         }
-        return true; //true if query success, else false
+        return true;
     }
 
-    // Utility function to check if user exists in group
-    public boolean userExistsInGroup(String group_id, String username) throws SQLException {
-        String query = "SELECT * FROM group_user WHERE group_id = '"
-                + group_id + "' AND username = '" + username + "'";
+    /** Functional method: Remove (kick) user from a group. */
+    public boolean removeUserFromGroup(String group_id, String removed_username) throws SQLException {
+        String query = "DELETE FROM group_user " +
+                "WHERE group_id = '" + group_id + "' AND username = '" + removed_username + "'";
+
         try {
-            String resultString = "";
+            // Can't delete if user is host
+            if (!removed_username.equals(getGroupHost(group_id))) {
+                statement.executeUpdate(query);
+            } else {
+                System.out.println("Error: Can't remove host from group");
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /** Functional method: Remove group. */
+    public boolean removeGroup(String group_id) throws SQLException {
+        String query = "DELETE FROM group_name " +
+                "WHERE group_id = '" + group_id + "'";
+
+        try {
+            statement.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    ///////////////// UTILITY METHODS /////////////////
+
+    /** Utility method: Check if a certain user exists in a group. */
+    public boolean userExistsInGroup(String group_id, String username) throws SQLException {
+        String query = "SELECT * FROM group_user " +
+                "WHERE group_id = '" + group_id + "' AND username = '" + username + "'";
+        try {
+            String resultString;
             ResultSet result = statement.executeQuery(query);
 
             if (result.next()) {
@@ -79,11 +121,56 @@ public class DbObject {
         return false;
     }
 
+    /** Utility method: Check if a certain group exists. */
+    public boolean groupExists(String group_id) throws SQLException {
+        String query = "SELECT * FROM group_name " +
+                "WHERE group_id = '" + group_id + "'";
+        try {
+            String resultString;
+            ResultSet result = statement.executeQuery(query);
+
+            if (result.next()) {
+                resultString = result.getString("group_id");
+                if (resultString.equals(group_id)) {
+                    return true;
+                }
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+
+        return false;
+    }
+
+    /** Utility method: Get the name of a group host. */
+    public String getGroupHost(String group_id) throws SQLException {
+        String query = "SELECT * FROM group_user " +
+                "WHERE group_id = '" + group_id + "' AND is_host = 'T'";
+        try {
+            String resultString;
+            ResultSet result = statement.executeQuery(query);
+
+            if (result.next()) {
+                resultString = result.getString("username");
+                return resultString;
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // TODO: Utility method to remove X marked users
+    // TODO: Utility method to remove userless groups
+    // TODO: Utility method to get group_id
     public static void main(String[] args) {
         try {
             DbObject dbObject = new DbObject();
-            System.out.println(dbObject.userExistsInGroup("1lP2AtiPbyYigH9X2fCH", "ligma"));
-            dbObject.addUserToGroup("1lP2AtiPbyYigH9X2fCH", "ligma", true);
         } catch (SQLException e) {
             e.printStackTrace();
         }

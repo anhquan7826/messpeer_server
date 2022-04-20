@@ -95,6 +95,25 @@ public class DbObject {
         return true;
     }
 
+    /** Functional method: Change group host. */
+    public boolean changeGroupHost(String group_id, String new_host) throws SQLException {
+        String oldHostQuery = "UPDATE group_user " +
+                "SET is_host = 'F' " +
+                "WHERE group_id = '" + group_id + "' AND is_host = 'T'";
+        String newHostQuery = "UPDATE group_user " +
+                "SET is_host = 'T' " +
+                "WHERE group_id = '" + group_id + "' AND username = '" + new_host + "'";
+
+        try {
+            statement.executeUpdate(oldHostQuery);
+            statement.executeUpdate(newHostQuery);
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
     ///////////////// UTILITY METHODS /////////////////
 
     /** Utility method: Check if a certain user exists in a group. */
@@ -168,9 +187,44 @@ public class DbObject {
     // TODO: Utility method to remove X marked users
     // TODO: Utility method to remove userless groups
     // TODO: Utility method to get group_id
+    // Temporary method to get group_id
+    public String getGroupId(String group_name) throws SQLException {
+        String query = "SELECT * FROM group_name " +
+                "WHERE group_name = '" + group_name + "'";
+        try {
+            String resultString;
+            ResultSet result = statement.executeQuery(query);
+
+            if (result.next()) {
+                resultString = result.getString("group_id");
+                return resultString;
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         try {
             DbObject dbObject = new DbObject();
+            // Create group xxx with host ligma
+//             dbObject.createGroup("xxx", "ligma");
+            // Add to the group: abc, cisco, shitco, sugma
+            String id = dbObject.getGroupId("xxx");
+//            dbObject.addUserToGroup(id, "abc", false);
+//            dbObject.addUserToGroup(id, "cisco", false);
+//            dbObject.addUserToGroup(id, "shitco", false);
+//            dbObject.addUserToGroup(id, "sugma", false);
+
+            // Remove from the group: cisco
+//            dbObject.removeUserFromGroup(id, "cisco");
+//
+//            // Change host to sugma
+//            dbObject.changeGroupHost(id, "sugma");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

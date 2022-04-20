@@ -5,6 +5,7 @@ import utils.IDGenerator;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DbObject {
@@ -20,7 +21,7 @@ public class DbObject {
         String password = "";
         Connection connection = DriverManager.getConnection(url, user, password);
         statement = connection.createStatement();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
     }
 
     ///////////////// FUNCTIONAL METHODS /////////////////
@@ -74,7 +75,7 @@ public class DbObject {
                 "WHERE group_id = '" + group_id + "' AND username = '" + removed_username + "'";
 
         try {
-            // Can't delete if user is host
+            // Can't delete if user is the host
             if (!removed_username.equals(getGroupHost(group_id))) {
                 statement.executeUpdate(query);
             } else {
@@ -205,32 +206,102 @@ public class DbObject {
         }
     }
 
-    // Utility method: Get current time
+    /** Utility method: Get current time. */
     public String getCurrentTime() {
         calendar = Calendar.getInstance();
         return dateFormat.format(calendar.getTime());
     }
 
-    // TODO: Utility method to remove X marked users
+    /** Utility method: Remove X marked users from a group. */
+    public void removeXMarkedUsersFromGroup(String group_id) {
+        String query = "DELETE FROM group_user "
+                + "WHERE group_id = '" + group_id + "'"
+                + "AND is_host = 'X'";
+
+        try {
+            statement.executeUpdate(query);
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
     // TODO: Utility method to remove userless groups
     // TODO: Utility method to get group_id
-    // Temporary method to get group_id
-    public String getGroupId(String group_name) throws SQLException {
-        String query = "SELECT * FROM group_name " +
-                "WHERE group_name = '" + group_name + "'";
+    public ArrayList<String> getGroupId(String username){
+        // Query to get all messages (order by time)
+        String query = "SELECT group_id FROM group_user " +
+                "WHERE username = '" + username + "'";
+        ArrayList<String> group_id = new ArrayList<>();
+
         try {
             String resultString;
             ResultSet result = statement.executeQuery(query);
 
-            if (result.next()) {
+            while (result.next()) {
                 resultString = result.getString("group_id");
-                return resultString;
-            } else {
-                return null;
+                group_id.add(resultString);
             }
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
             return null;
+        }
+        return group_id;
+    }
+
+    /** Utility method: Get messages from a group. */
+    public ArrayList<String> getMessages(String group_id) {
+        String query = "SELECT message_content FROM message " +
+                "WHERE group_id = '" + group_id + "'" +
+                "ORDER BY created_date DESC LIMIT 20" ;
+        ArrayList<String> messages = new ArrayList<>();
+
+        try {
+            String resultString;
+            ResultSet result = statement.executeQuery(query);
+
+            while (result.next()) {
+                resultString = result.getString("message_content");
+                messages.add(resultString);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+            return null;
+        }
+        return messages;
+    }
+
+    // Temporary method to get group_id
+//    public String getGroupIdx(String group_name) throws SQLException {
+//        String query = "SELECT * FROM group_name " +
+//                "WHERE group_name = '" + group_name + "'";
+//        try {
+//            String resultString;
+//            ResultSet result = statement.executeQuery(query);
+//
+//            if (result.next()) {
+//                resultString = result.getString("group_id");
+//                return resultString;
+//            } else {
+//                return null;
+//            }
+//        } catch (SQLException e) {
+//            System.out.println("Error: " + e.getMessage());
+//            return null;
+//        }
+//    }
+
+    // Test: querry all
+    public void testQueryAll() {
+        String query = "SELECT * FROM message LIMIT 20";
+        try {
+            ResultSet result = statement.executeQuery(query);
+
+            while (result.next()) {
+
+                System.out.println(result.getString("created_date"));
+                System.out.println(result.getString("message_content"));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -240,7 +311,7 @@ public class DbObject {
             // Create group xxx with host ligma
 //             dbObject.createGroup("xxx", "ligma");
             // Add to the group: abc, cisco, shitco, sugma
-            String id = dbObject.getGroupId("xxx");
+//            String id = dbObject.getGroupId("xxx");
 //            dbObject.addUserToGroup(id, "abc", false);
 //            dbObject.addUserToGroup(id, "cisco", false);
 //            dbObject.addUserToGroup(id, "shitco", false);
@@ -251,7 +322,20 @@ public class DbObject {
 //
 //            // Change host to sugma
 //            dbObject.changeGroupHost(id, "sugma");
-            dbObject.sendMessageToGroup("ligma", id, "Hello");
+//            System.out.println(dbObject.getMessages("sugma"));
+//
+//            String groupid = "h7a7EgzucVgRDIKBIQYF";
+//            String userid = "ligma";
+//
+//            for (int i = 0; i < 10; i++) {
+//                Thread.sleep(100);
+//                dbObject.sendMessageToGroup(groupid, userid, "Zzzz " + i);
+//
+//            }
+//
+//            System.out.println(dbObject.getMessages(groupid));;
+            System.out.println(dbObject.getCurrentTime());
+            dbObject.testQueryAll();
         } catch (SQLException e) {
             e.printStackTrace();
         }

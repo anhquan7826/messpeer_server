@@ -5,6 +5,7 @@ public class Authentication {
         // TODO: authenticate a client
         String username = initMessage.split(":")[1].split(" ")[0];
         String passwordHash = initMessage.split(":")[1].split(" ")[1];
+
         return true;
     }
 }

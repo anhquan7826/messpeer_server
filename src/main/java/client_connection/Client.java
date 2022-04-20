@@ -104,7 +104,7 @@ public class Client extends Thread {
                 } else if (message.startsWith("SEND_MESSAGE")) {
                     String groupChatID = message.split(":")[1].split(" ")[0];
                     String messageJson = message.split(":")[1].split(" ")[1];
-                    // TODO: send message to client in ${groupChatID} group
+                    // TODO: send message to client in ${groupChatID} group (done)
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);

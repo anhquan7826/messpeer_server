@@ -1,5 +1,6 @@
 package database;
 
+import client_connection.Authentication;
 import utils.IDGenerator;
 
 import java.sql.*;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DbObject {
-    private static Statement statement;
+    public static Statement statement;
 
     private DateFormat dateFormat;
     private Calendar calendar;
@@ -291,12 +292,11 @@ public class DbObject {
 
     // Test: querry all
     public void testQueryAll() {
-        String query = "SELECT * FROM message LIMIT 20";
+        String query = "SELECT * FROM message ORDER BY created_date DESC LIMIT 20";
         try {
             ResultSet result = statement.executeQuery(query);
 
             while (result.next()) {
-
                 System.out.println(result.getString("created_date"));
                 System.out.println(result.getString("message_content"));
             }
@@ -308,10 +308,11 @@ public class DbObject {
     public static void main(String[] args) {
         try {
             DbObject dbObject = new DbObject();
-            // Create group xxx with host ligma
-//             dbObject.createGroup("xxx", "ligma");
-            // Add to the group: abc, cisco, shitco, sugma
-//            String id = dbObject.getGroupId("xxx");
+             //Create group xxx with host ligma
+             dbObject.createGroup("xxx", "ligma");
+             //Add to the group: abc, cisco, shitco, sugma
+            //String id = dbObject.getGroupId("xxx");
+            String id = "2r7GDiZMeaDHOEaNBtVi";
 //            dbObject.addUserToGroup(id, "abc", false);
 //            dbObject.addUserToGroup(id, "cisco", false);
 //            dbObject.addUserToGroup(id, "shitco", false);
@@ -325,18 +326,19 @@ public class DbObject {
 //            System.out.println(dbObject.getMessages("sugma"));
 //
 //            String groupid = "h7a7EgzucVgRDIKBIQYF";
-//            String userid = "ligma";
-//
-//            for (int i = 0; i < 10; i++) {
-//                Thread.sleep(100);
-//                dbObject.sendMessageToGroup(groupid, userid, "Zzzz " + i);
-//
-//            }
+            String userid = "ligma";
+
+            for (int i = 0; i < 10; i++) {
+                Thread.sleep(100);
+                dbObject.sendMessageToGroup(id, userid, "Zzzz " + i);
+
+            }
 //
 //            System.out.println(dbObject.getMessages(groupid));;
-            System.out.println(dbObject.getCurrentTime());
+//            //System.out.println(dbObject.getCurrentTime());
             dbObject.testQueryAll();
-        } catch (SQLException e) {
+            System.out.println(Authentication.authenticate("cisco : 12345"));
+        } catch (SQLException | InterruptedException e) {
             e.printStackTrace();
         }
     }

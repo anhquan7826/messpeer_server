@@ -1,6 +1,5 @@
 package database;
 
-import client_connection.Authentication;
 import utils.IDGenerator;
 
 import java.sql.*;
@@ -22,7 +21,7 @@ public class DbObject {
         String password = "";
         Connection connection = DriverManager.getConnection(url, user, password);
         statement = connection.createStatement();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSS");
     }
 
     ///////////////// FUNCTIONAL METHODS /////////////////
@@ -251,8 +250,8 @@ public class DbObject {
     /** Utility method: Get messages from a group. */
     public ArrayList<String> getMessages(String group_id) {
         String query = "SELECT message_content FROM message " +
-                "WHERE group_id = '" + group_id + "'" +
-                "ORDER BY created_date DESC LIMIT 20" ;
+                "WHERE group_id = " + group_id +
+                " ORDER BY created_date DESC LIMIT 10" ;
         ArrayList<String> messages = new ArrayList<>();
 
         try {
@@ -291,8 +290,10 @@ public class DbObject {
 //    }
 
     // Test: querry all
-    public void testQueryAll() {
-        String query = "SELECT * FROM message ORDER BY created_date DESC LIMIT 20";
+    public void testQueryAll(String group_id) {
+        String query = "SELECT * FROM message " +
+                "WHERE group_id = " + "'" + group_id + "'" +
+                " ORDER BY created_date DESC LIMIT 10";
         try {
             ResultSet result = statement.executeQuery(query);
 
@@ -308,37 +309,19 @@ public class DbObject {
     public static void main(String[] args) {
         try {
             DbObject dbObject = new DbObject();
-             //Create group xxx with host ligma
-             dbObject.createGroup("xxx", "ligma");
-             //Add to the group: abc, cisco, shitco, sugma
-            //String id = dbObject.getGroupId("xxx");
-            String id = "2r7GDiZMeaDHOEaNBtVi";
-//            dbObject.addUserToGroup(id, "abc", false);
-//            dbObject.addUserToGroup(id, "cisco", false);
-//            dbObject.addUserToGroup(id, "shitco", false);
-//            dbObject.addUserToGroup(id, "sugma", false);
+            dbObject.createGroup("yyy", "ligma");
 
-            // Remove from the group: cisco
-//            dbObject.removeUserFromGroup(id, "cisco");
-//
-//            // Change host to sugma
-//            dbObject.changeGroupHost(id, "sugma");
-//            System.out.println(dbObject.getMessages("sugma"));
-//
-//            String groupid = "h7a7EgzucVgRDIKBIQYF";
+            String id = "jIUFHvNPhqNjlZ41y3lX";
+
             String userid = "ligma";
 
             for (int i = 0; i < 10; i++) {
-                Thread.sleep(100);
-                dbObject.sendMessageToGroup(id, userid, "Zzzz " + i);
+                dbObject.sendMessageToGroup(id, userid, "xyz" + i);
 
             }
-//
-//            System.out.println(dbObject.getMessages(groupid));;
-//            //System.out.println(dbObject.getCurrentTime());
-            dbObject.testQueryAll();
-            System.out.println(Authentication.authenticate("cisco : 12345"));
-        } catch (SQLException | InterruptedException e) {
+            dbObject.testQueryAll(id);
+//            System.out.println(Authentication.authenticate("cisco : 12345"));
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }

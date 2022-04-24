@@ -1,5 +1,6 @@
 package database;
 
+import client_connection.Authentication;
 import utils.IDGenerator;
 
 import java.sql.*;
@@ -11,8 +12,8 @@ import java.util.Calendar;
 public class DbObject {
     public static Statement statement;
 
-    private DateFormat dateFormat;
-    private Calendar calendar;
+    //private DateFormat dateFormat;
+    //private Calendar calendar;
 
     /** Constructor. */
     public DbObject() throws SQLException {
@@ -21,7 +22,7 @@ public class DbObject {
         String password = "";
         Connection connection = DriverManager.getConnection(url, user, password);
         statement = connection.createStatement();
-        dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSS");
+        //dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSS");
     }
 
     ///////////////// FUNCTIONAL METHODS /////////////////
@@ -124,7 +125,7 @@ public class DbObject {
 
     /** Functional method: Send message to group. */
     public boolean sendMessageToGroup(String group_id, String user_id, String message_content) throws SQLException {
-        String currentTime = getCurrentTime();
+        String currentTime = TimeObject.getTime();
         String query = "INSERT INTO message (group_id, user_id, message_content, created_date) "
                 + "VALUES ('" + group_id + "', '" + user_id + "', '" + message_content + "', '" + currentTime + "')";
         try {
@@ -207,10 +208,10 @@ public class DbObject {
     }
 
     /** Utility method: Get current time. */
-    public String getCurrentTime() {
-        calendar = Calendar.getInstance();
-        return dateFormat.format(calendar.getTime());
-    }
+//    public String getCurrentTime() {
+//        calendar = Calendar.getInstance();
+//        return dateFormat.format(calendar.getTime());
+//    }
 
     /** Utility method: Remove X marked users from a group. */
     public void removeXMarkedUsersFromGroup(String group_id) {
@@ -309,9 +310,9 @@ public class DbObject {
     public static void main(String[] args) {
         try {
             DbObject dbObject = new DbObject();
-            dbObject.createGroup("yyy", "ligma");
+//            dbObject.createGroup("yyy", "ligma");
 
-            String id = "jIUFHvNPhqNjlZ41y3lX";
+            String id = "RouCkidBy7tfFUdr4296";
 
             String userid = "ligma";
 
@@ -320,7 +321,7 @@ public class DbObject {
 
             }
             dbObject.testQueryAll(id);
-//            System.out.println(Authentication.authenticate("cisco : 12345"));
+            System.out.println(Authentication.authenticate("cisco : 12345"));
         } catch (SQLException e) {
             e.printStackTrace();
         }

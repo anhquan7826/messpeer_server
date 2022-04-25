@@ -8,5 +8,5 @@ GROUP_CHAT_KICK:<username>
 GROUP_CHAT_CHANGE_HOST:<username>
 GROUP_CHAT_DELETE:<group_chat_id>
 
-// dùng hi client gửi tin nhắn
-SEND_MESSAGE:<group_chat_id> <message_object>
+// dùng khi client gửi tin nhắn
+SEND_MESSAGE:<username> <group_chat_id> <message_object>

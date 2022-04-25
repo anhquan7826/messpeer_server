@@ -96,14 +96,15 @@ public class Client extends Thread {
                 } else if (message.startsWith("GROUP_CHAT_ADD")) {
                     // TODO: query database
                 } else if (message.startsWith("GROUP_CHAT_KICK")) {
-                    //// TODO: query database
+                    // TODO: query database
                 } else if (message.startsWith("GROUP_CHAT_CHANGE_HOST")) {
                     // TODO: query database
                 } else if (message.startsWith("GROUP_CHAT_DELETE")) {
                     // TODO: query database
                 } else if (message.startsWith("SEND_MESSAGE")) {
-                    String groupChatID = message.split(":")[1].split(" ")[0];
-                    String messageJson = message.split(":")[1].split(" ")[1];
+                    String username = message.split(":")[1].split(" ")[0];
+                    String groupChatID = message.split(":")[1].split(" ")[1];
+                    String messageJson = message.split(":")[1].split(" ")[2];
                     // TODO: send message to client in ${groupChatID} group
                 }
             } catch (Exception e) {

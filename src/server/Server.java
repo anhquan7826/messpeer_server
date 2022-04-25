@@ -1,6 +1,6 @@
 package server;
 
-import client_connection.Authentication;
+import client_connection.Authenticator;
 import client_connection.Client;
 
 import java.io.IOException;
@@ -9,12 +9,16 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class Server {
-    private ServerSocket listeningSocket;
+    private final int commandPort = 43896;
+    private final int messagePort = commandPort + 1;
+
+    private ServerSocket commandSocket;
+    private ServerSocket messageSocket;
     public HashMap<String, Client> userList;
     private boolean serverRunning;
 
-    public Server(int port) throws IOException {
-        listeningSocket = new ServerSocket(port);
+    public Server() throws IOException {
+        commandSocket = new ServerSocket(commandPort);
         serverRunning = true;
         userList = new HashMap<>();
 
@@ -27,12 +31,9 @@ public class Server {
             public void run() {
                 while (serverRunning) {
                     try {
-                        Client client = new Client(listeningSocket.accept());
-                        if (Authentication.authenticate(client.getMessage())) {
-                            userList.put(client.getUsername(), client);
-                            client.sendMessage("AUTHENTICATE_SUCCESS");
-                        } else {
-                            client.sendMessage("AUTHENTICATE_FAIL");
+                        Socket socket = commandSocket.accept();
+                        if (socket != null) {
+                            new Authenticator(socket).start();
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -42,5 +43,7 @@ public class Server {
         }).start();
     }
 
+    public static void main(String[] args) {
 
+    }
 }

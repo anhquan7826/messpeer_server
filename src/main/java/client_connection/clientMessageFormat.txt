@@ -1,12 +1,31 @@
 // dùng khi client mới thiết lập kết nối đến server
-INITIAL_MESSAGE:<username> <password_hash>
+Clinet: INITIAL_MESSAGE:<username> <password_hash>
+Server: AUTHENTICATE_SUCCESS
+        AUTHENTICATE_FAIL
 
 // dùng khi client muốn quản lí group chat
-GROUP_CHAT_CREATE:<name>
-GROUP_CHAT_ADD:<username>
-GROUP_CHAT_KICK:<username>
-GROUP_CHAT_CHANGE_HOST:<username>
-GROUP_CHAT_DELETE:<group_chat_id>
+Client: GROUP_CHAT_CREATE:<name>
+Server: GROUP_CHAT_CREATE:SUCCESS:<name> <group_chat_id>
+        GROUP_CHAT_CREATE:FAILED:<name> <group_chat_id>
+
+Client: GROUP_CHAT_ADD:<username> <group_chat_id>
+Server: GROUP_CHAT_ADD:SUCCESS:<username> <group_chat_id>
+        GROUP_CHAT_ADD:FAILED:<username> <group_chat_id>
+
+Client: GROUP_CHAT_KICK:<username> <group_chat_id>
+Server: GROUP_CHAT_KICK:SUCCESS:<username> <group_chat_id>
+        GROUP_CHAT_KICK:FAILED:<username> <group_chat_id>
+
+Client: GROUP_CHAT_CHANGE_HOST:<username> <group_chat_id>
+Server: GROUP_CHAT_CHANGE_HOST:SUCCESS:<username> <group_chat_id>
+        GROUP_CHAT_CHANGE_HOST:FAILED:<username> <group_chat_id>
+
+Client: GROUP_CHAT_DELETE:<group_chat_id>
+Server: GROUP_CHAT_DELETE:SUCCESS:<group_chat_id>
+        GROUP_CHAT_DELETE:FAILED:<group_chat_id>
 
 // dùng khi client gửi tin nhắn
 SEND_MESSAGE:<username> <group_chat_id> <message_object>
+
+// dùng khi client nhận tin nhắn
+RECEIVE_MESSAGE:<username> <group_chat_id> <message_object>

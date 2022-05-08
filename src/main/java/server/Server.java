@@ -1,27 +1,19 @@
 package server;
 
-import client_connection.Authenticator;
 import client_connection.Client;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 
 public class Server {
     private final int commandPort = 43896;
-    private final int messagePort = commandPort + 1;
-
     private ServerSocket commandSocket;
-    private ServerSocket messageSocket;
-    public HashMap<String, Client> userList;
     private boolean serverRunning;
 
     public Server() throws IOException {
         commandSocket = new ServerSocket(commandPort);
+        System.out.println("Server is listening on port " + commandPort);
         serverRunning = true;
-        userList = new HashMap<>();
-
         acceptConnection();
     }
 
@@ -33,7 +25,8 @@ public class Server {
                     try {
                         Socket socket = commandSocket.accept();
                         if (socket != null) {
-                            new Authenticator(socket).start();
+                            new Client(socket);
+                            System.out.println("Client at " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort() + " connected!");
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -43,7 +36,7 @@ public class Server {
         }).start();
     }
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws IOException {
+        new Server();
     }
 }

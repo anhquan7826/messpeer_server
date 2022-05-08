@@ -316,12 +316,12 @@ public class DbObject {
 
             String userid = "ligma";
 
-            for (int i = 0; i < 10; i++) {
+            /*for (int i = 0; i < 10; i++) {
                 dbObject.sendMessageToGroup(id, userid, "xyz" + i);
 
             }
-            dbObject.testQueryAll(id);
-            System.out.println(Authentication.authenticate("cisco : 12345"));
+            dbObject.testQueryAll(id);*/
+            System.out.println(Authentication.authenticate("ligma : 12233333333"));
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -19,14 +19,14 @@ public class Authentication {
             String passwordHash_result = "";
             while (resultSet.next()) {
                 username_result = resultSet.getString("username");
-                //System.out.println("user: " + username_result);
+                System.out.println("user: " + username_result);
                 passwordHash_result = resultSet.getString("password_hash");
-                //System.out.println("pass: " + passwordHash_result);
+                System.out.println("pass: " + passwordHash_result);
             }
             if (username_result.equals("")) {
                 return false;
             }
-            if (passwordHash_result.equals("")) {
+            if (!passwordHash_result.equals(passwordHash)) {
                 return false;
             }
         } catch (SQLException e) {

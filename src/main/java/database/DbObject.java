@@ -1,6 +1,5 @@
 package database;
 
-import client_connection.Authentication;
 import utils.IDGenerator;
 
 import java.sql.*;
@@ -10,13 +9,25 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class DbObject {
+    private static DbObject instance;
+    public static DbObject getInstance() {
+        if (instance == null) {
+            try {
+                instance = new DbObject();
+            } catch (SQLException e) {
+                System.out.println("Cannot instantiate DbObject!");
+            }
+        }
+        return instance;
+    }
+
     public static Statement statement;
 
     //private DateFormat dateFormat;
     //private Calendar calendar;
 
     /** Constructor. */
-    public DbObject() throws SQLException {
+    private DbObject() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/messpear";
         String user = "root";
         String password = "";
@@ -307,23 +318,35 @@ public class DbObject {
         }
     }
 
-    public static void main(String[] args) {
+    public boolean authenticate(String initMessage) {
+        // TODO: authenticate a client
+        String username = initMessage.split(":")[0].split(" ")[0];
+        String passwordHash = initMessage.split(":")[1].split(" ")[1];
+        String checkUsername = "SELECT * FROM `user` WHERE `username` = '" + username + "'";
+        //System.out.println("user: " + username);
         try {
-            DbObject dbObject = new DbObject();
-//            dbObject.createGroup("yyy", "ligma");
-
-            String id = "RouCkidBy7tfFUdr4296";
-
-            String userid = "ligma";
-
-            for (int i = 0; i < 10; i++) {
-                dbObject.sendMessageToGroup(id, userid, "xyz" + i);
-
+            ResultSet resultSet = DbObject.statement.executeQuery(checkUsername);
+            String username_result = "";
+            String passwordHash_result = "";
+            while (resultSet.next()) {
+                username_result = resultSet.getString("username");
+                System.out.println("user: " + username_result);
+                passwordHash_result = resultSet.getString("password_hash");
+                System.out.println("pass: " + passwordHash_result);
             }
-            dbObject.testQueryAll(id);
-            System.out.println(Authentication.authenticate("cisco : 12345"));
+            if (username_result.equals("")) {
+                return false;
+            }
+            if (!passwordHash_result.equals(passwordHash)) {
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(DbObject.getInstance().authenticate("INITIAL_MESSAGE:abc 96354"));
     }
 }

@@ -1,1 +1,10 @@
 /out/
+/target/classes/client_connection/Client$1.class
+/target/classes/client_connection/Client.class
+/target/classes/database/DbObject.class
+/target/classes/communication/GroupChat.class
+/target/classes/utils/IDGenerator.class
+/target/classes/database/ReadTimeObject.class
+/target/classes/server/Server$1.class
+/target/classes/server/Server.class
+/target/classes/database/TimeObject.class

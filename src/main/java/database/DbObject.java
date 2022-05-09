@@ -320,8 +320,9 @@ public class DbObject {
 
     public boolean authenticate(String initMessage) {
         // TODO: authenticate a client
-        String username = initMessage.split(":")[0].split(" ")[0];
+        String username = initMessage.split(":")[1].split(" ")[0];
         String passwordHash = initMessage.split(":")[1].split(" ")[1];
+        System.out.println(username + ' ' + passwordHash);
         String checkUsername = "SELECT * FROM `user` WHERE `username` = '" + username + "'";
         //System.out.println("user: " + username);
         try {

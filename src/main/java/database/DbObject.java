@@ -10,6 +10,7 @@ import java.util.Calendar;
 
 public class DbObject {
     private static DbObject instance;
+
     public static DbObject getInstance() {
         if (instance == null) {
             try {
@@ -26,7 +27,9 @@ public class DbObject {
     //private DateFormat dateFormat;
     //private Calendar calendar;
 
-    /** Constructor. */
+    /**
+     * Constructor.
+     */
     private DbObject() throws SQLException {
         String url = "jdbc:mysql://localhost:3306/messpear";
         String user = "root";
@@ -38,7 +41,9 @@ public class DbObject {
 
     ///////////////// FUNCTIONAL METHODS /////////////////
 
-    /** Functional method: Create a Group. */
+    /**
+     * Functional method: Create a Group.
+     */
     public boolean createGroup(String groupname, String username) throws SQLException {
         String groupID = IDGenerator.generate(20);
         String createGroupQuery = "INSERT INTO group_name (group_id, group_name) " +
@@ -59,7 +64,9 @@ public class DbObject {
         return true;
     }
 
-    /** Functional method: Add a user to a group. */
+    /**
+     * Functional method: Add a user to a group.
+     */
     public boolean addUserToGroup(String group_id, String added_username, boolean is_hostBool) throws SQLException {
         char is_host = is_hostBool ? 'T' : 'F';
 
@@ -81,11 +88,12 @@ public class DbObject {
         return true;
     }
 
-    /** Functional method: Remove (kick) user from a group. */
+    /**
+     * Functional method: Remove (kick) user from a group.
+     */
     public boolean removeUserFromGroup(String group_id, String removed_username) throws SQLException {
         String query = "DELETE FROM group_user " +
                 "WHERE group_id = '" + group_id + "' AND username = '" + removed_username + "'";
-
         try {
             // Can't delete if user is the host
             if (!removed_username.equals(getGroupHost(group_id))) {
@@ -101,11 +109,12 @@ public class DbObject {
         return true;
     }
 
-    /** Functional method: Remove group. */
+    /**
+     * Functional method: Remove group.
+     */
     public boolean removeGroup(String group_id) throws SQLException {
         String query = "DELETE FROM group_name " +
                 "WHERE group_id = '" + group_id + "'";
-
         try {
             statement.executeUpdate(query);
         } catch (SQLException e) {
@@ -115,7 +124,9 @@ public class DbObject {
         return true;
     }
 
-    /** Functional method: Change group host. */
+    /**
+     * Functional method: Change group host.
+     */
     public boolean changeGroupHost(String group_id, String new_host) throws SQLException {
         String oldHostQuery = "UPDATE group_user " +
                 "SET is_host = 'F' " +
@@ -134,7 +145,9 @@ public class DbObject {
         return true;
     }
 
-    /** Functional method: Send message to group. */
+    /**
+     * Functional method: Send message to group.
+     */
     public boolean sendMessageToGroup(String group_id, String user_id, String message_content) throws SQLException {
         String currentTime = TimeObject.getTime();
         String query = "INSERT INTO message (group_id, user_id, message_content, created_date) "
@@ -150,7 +163,9 @@ public class DbObject {
 
     ///////////////// UTILITY METHODS /////////////////
 
-    /** Utility method: Check if a certain user exists in a group. */
+    /**
+     * Utility method: Check if a certain user exists in a group.
+     */
     public boolean userExistsInGroup(String group_id, String username) throws SQLException {
         String query = "SELECT * FROM group_user " +
                 "WHERE group_id = '" + group_id + "' AND username = '" + username + "'";
@@ -174,7 +189,9 @@ public class DbObject {
         return false;
     }
 
-    /** Utility method: Check if a certain group exists. */
+    /**
+     * Utility method: Check if a certain group exists.
+     */
     public boolean groupExists(String group_id) throws SQLException {
         String query = "SELECT * FROM group_name " +
                 "WHERE group_id = '" + group_id + "'";
@@ -198,7 +215,9 @@ public class DbObject {
         return false;
     }
 
-    /** Utility method: Get the name of a group host. */
+    /**
+     * Utility method: Get the name of a group host.
+     */
     public String getGroupHost(String group_id) throws SQLException {
         String query = "SELECT * FROM group_user " +
                 "WHERE group_id = '" + group_id + "' AND is_host = 'T'";
@@ -218,13 +237,9 @@ public class DbObject {
         }
     }
 
-    /** Utility method: Get current time. */
-//    public String getCurrentTime() {
-//        calendar = Calendar.getInstance();
-//        return dateFormat.format(calendar.getTime());
-//    }
-
-    /** Utility method: Remove X marked users from a group. */
+    /**
+     * Utility method: Remove X marked users from a group.
+     */
     public void removeXMarkedUsersFromGroup(String group_id) {
         String query = "DELETE FROM group_user "
                 + "WHERE group_id = '" + group_id + "'"
@@ -236,9 +251,10 @@ public class DbObject {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
     // TODO: Utility method to remove userless groups
     // TODO: Utility method to get group_id
-    public ArrayList<String> getGroupId(String username){
+    public ArrayList<String> getGroupId(String username) {
         // Query to get all messages (order by time)
         String query = "SELECT group_id FROM group_user " +
                 "WHERE username = '" + username + "'";
@@ -259,11 +275,13 @@ public class DbObject {
         return group_id;
     }
 
-    /** Utility method: Get messages from a group. */
+    /**
+     * Utility method: Get messages from a group.
+     */
     public ArrayList<String> getMessages(String group_id) {
         String query = "SELECT message_content FROM message " +
                 "WHERE group_id = " + group_id +
-                " ORDER BY created_date DESC LIMIT 10" ;
+                " ORDER BY created_date DESC LIMIT 10";
         ArrayList<String> messages = new ArrayList<>();
 
         try {
@@ -281,48 +299,10 @@ public class DbObject {
         return messages;
     }
 
-    // Temporary method to get group_id
-//    public String getGroupIdx(String group_name) throws SQLException {
-//        String query = "SELECT * FROM group_name " +
-//                "WHERE group_name = '" + group_name + "'";
-//        try {
-//            String resultString;
-//            ResultSet result = statement.executeQuery(query);
-//
-//            if (result.next()) {
-//                resultString = result.getString("group_id");
-//                return resultString;
-//            } else {
-//                return null;
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Error: " + e.getMessage());
-//            return null;
-//        }
-//    }
-
-    // Test: querry all
-    public void testQueryAll(String group_id) {
-        String query = "SELECT * FROM message " +
-                "WHERE group_id = " + "'" + group_id + "'" +
-                " ORDER BY created_date DESC LIMIT 10";
-        try {
-            ResultSet result = statement.executeQuery(query);
-
-            while (result.next()) {
-                System.out.println(result.getString("created_date"));
-                System.out.println(result.getString("message_content"));
-            }
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-    }
-
     public boolean authenticate(String initMessage) {
         // TODO: authenticate a client
         String username = initMessage.split(":")[1].split(" ")[0];
         String passwordHash = initMessage.split(":")[1].split(" ")[1];
-        System.out.println(username + ' ' + passwordHash);
         String checkUsername = "SELECT * FROM `user` WHERE `username` = '" + username + "'";
         //System.out.println("user: " + username);
         try {
@@ -331,9 +311,7 @@ public class DbObject {
             String passwordHash_result = "";
             while (resultSet.next()) {
                 username_result = resultSet.getString("username");
-                System.out.println("user: " + username_result);
                 passwordHash_result = resultSet.getString("password_hash");
-                System.out.println("pass: " + passwordHash_result);
             }
             if (username_result.equals("")) {
                 return false;
@@ -345,9 +323,5 @@ public class DbObject {
             e.printStackTrace();
         }
         return true;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(DbObject.getInstance().authenticate("INITIAL_MESSAGE:abc 96354"));
     }
 }

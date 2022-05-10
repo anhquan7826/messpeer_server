@@ -1,6 +1,7 @@
 package client_connection;
 
 import database.DbObject;
+import utils.MessageJoiner;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class Client extends Thread {
+public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
     private PrintWriter printWriter;
@@ -18,6 +19,7 @@ public class Client extends Thread {
 
     public Client(Socket socket) throws IOException {
         this.socket = socket;
+        setUsername(socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
         clientConnected = true;
         clientAuthenticated = false;
         bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -25,41 +27,23 @@ public class Client extends Thread {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                /*new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                if (socket.getInputStream().available() < 0) {
-                                    clientConnected = false;
-                                    System.out.println(getUsername() + " disconnected!");
-                                    break;
-                                }
-                            } catch (IOException e) {
-                                clientConnected = false;
-                                System.out.println(getUsername() + " disconnected!");
-                                break;
-                            }
-                        }
-                    }
-                }).start();*/
                 while (clientConnected && !clientAuthenticated) {
                     try {
                         String initMessage = getMessage();
-                        System.out.println(initMessage);
+                        if (initMessage != null) System.out.println(username + ": " + initMessage);
+                        else continue;
                         clientAuthenticated = DbObject.getInstance().authenticate(initMessage);
                         if (clientAuthenticated) {
-                            System.out.println("Authenticate success!");
+                            System.out.println(username + ": Authenticate success!");
                             sendMessage("AUTHENTICATE_SUCCESS");
                             setUsername(initMessage.split(":")[1].split(" ")[0]);
+                            startCommunicate();
                         } else {
-                            System.out.println("Authenticate failed!");
+                            System.out.println(username + ": Authenticate failed!");
                             sendMessage("AUTHENTICATE_FAILED");
-                            setUsername(null);
                         };
                     } catch (Exception e) {
                         clientAuthenticated = false;
-                        setUsername(null);
                     }
                 }
             }
@@ -67,7 +51,12 @@ public class Client extends Thread {
     }
 
     public void sendMessage(String message) {
-        printWriter.println(message);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                printWriter.println(message);
+            }
+        }).start();
     }
 
     public String getMessage() throws Exception {
@@ -87,7 +76,7 @@ public class Client extends Thread {
     }
 
     public void closeConnection() {
-        System.out.println("Client disconnected!");
+        System.out.println(username + " disconnected!");
         clientConnected = false;
     }
 
@@ -115,38 +104,45 @@ public class Client extends Thread {
         return clientConnected;
     }
 
-    @Override
-    public void run() {
-        while (clientConnected) {
-            if (clientAuthenticated) {
-                try {
-                    String message = getMessage();
-                    if (message.startsWith("GROUP_CHAT_CREATE")) {
-                        // TODO: Create group chat
-                    } else if (message.startsWith("GROUP_CHAT_ADD")) {
-                        // TODO: query database
-                    } else if (message.startsWith("GROUP_CHAT_KICK")) {
-                        // TODO: query database
-                    } else if (message.startsWith("GROUP_CHAT_CHANGE_HOST")) {
-                        // TODO: Change group chat host (done)
-                    } else if (message.startsWith("GROUP_CHAT_DELETE")) {
-                        // TODO: query database
-                    } else if (message.startsWith("SEND_MESSAGE")) {
-                        String username = message.split(":")[1].split(" ")[0];
-                        String groupChatID = message.split(":")[1].split(" ")[1];
-                        String messageJson = message.split(":")[1].split(" ")[2];
-                        // TODO: send message to client in ${groupChatID} group
-                        
+    public void startCommunicate() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (clientConnected) {
+                    if (clientAuthenticated) {
+                        try {
+                            String message = getMessage();
+                            if (message != null) System.out.println(username + ": " + message);
+                            else continue;
+                            switch (message) {
+                                case "SEND_MESSAGE":
+                                    String username = message.split(":")[1].split(" ")[0];
+                                    String groupChatID = message.split(":")[1].split(" ")[1];
+                                    String[] temp = message.split(":")[1].split(" ");
+                                    String messageJson = MessageJoiner.join(temp, 2, temp.length);
+
+
+                                    break;
+                                case "GET_GROUPCHAT_LIST":
+                                    break;
+                                case "GROUP_CHAT_CREATE":
+                                    break;
+                                case "GROUP_CHAT_ADD":
+                                    break;
+                                case "GROUP_CHAT_KICK":
+                                    break;
+                                case "GROUP_CHAT_CHANGE_HOST":
+                                    break;
+                                case "GROUP_CHAT_DELETE":
+                                    break;
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
                 }
             }
-        }
+        }).start();
     }
 
-    @Override
-    public int hashCode() {
-        return username.hashCode();
-    }
 }

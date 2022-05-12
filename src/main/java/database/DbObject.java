@@ -1,12 +1,9 @@
 package database;
 
 import utils.IDGenerator;
-
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.HashMap;
 
 public class DbObject {
     private static DbObject instance;
@@ -22,10 +19,7 @@ public class DbObject {
         return instance;
     }
 
-    public static Statement statement;
-
-    //private DateFormat dateFormat;
-    //private Calendar calendar;
+    public Statement statement;
 
     /**
      * Constructor.
@@ -254,25 +248,29 @@ public class DbObject {
 
     // TODO: Utility method to remove userless groups
     // TODO: Utility method to get group_id
-    public ArrayList<String> getGroupId(String username) {
-        // Query to get all messages (order by time)
-        String query = "SELECT group_id FROM group_user " +
-                "WHERE username = '" + username + "'";
-        ArrayList<String> group_id = new ArrayList<>();
-
-        try {
-            String resultString;
-            ResultSet result = statement.executeQuery(query);
-
-            while (result.next()) {
-                resultString = result.getString("group_id");
-                group_id.add(resultString);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+    public HashMap<String, String> getGroupList(String username) {
+        if (username == null) {
             return null;
         }
-        return group_id;
+        ArrayList<String> temp = new ArrayList<>();
+        HashMap<String, String> groupList = new HashMap<>();
+        try {
+            ResultSet query1 = statement.executeQuery("SELECT group_id FROM group_user " + "WHERE username = '" + username + "'");
+            while (query1.next()) {
+                temp.add(query1.getString("group_id"));
+            }
+            query1.close();
+
+            for (String id : temp) {
+                ResultSet query2 = statement.executeQuery("SELECT * FROM group_name WHERE group_id = '" + id + "'");
+                query2.next();
+                groupList.put(query2.getString("group_id"), query2.getString("group_name"));
+                query2.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return groupList;
     }
 
     /**
@@ -299,14 +297,12 @@ public class DbObject {
         return messages;
     }
 
-    public boolean authenticate(String initMessage) {
+    public boolean authenticate(HashMap<String, String> credential) {
         // TODO: authenticate a client
-        String username = initMessage.split(":")[1].split(" ")[0];
-        String passwordHash = initMessage.split(":")[1].split(" ")[1];
-        String checkUsername = "SELECT * FROM `user` WHERE `username` = '" + username + "'";
+        String checkUsername = "SELECT * FROM `user` WHERE `username` = '" + credential.get("username") + "'";
         //System.out.println("user: " + username);
         try {
-            ResultSet resultSet = DbObject.statement.executeQuery(checkUsername);
+            ResultSet resultSet = statement.executeQuery(checkUsername);
             String username_result = "";
             String passwordHash_result = "";
             while (resultSet.next()) {
@@ -316,12 +312,16 @@ public class DbObject {
             if (username_result.equals("")) {
                 return false;
             }
-            if (!passwordHash_result.equals(passwordHash)) {
+            if (!passwordHash_result.equals(credential.get("password"))) {
                 return false;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return true;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(getInstance().getGroupList("anhquan7826"));
     }
 }

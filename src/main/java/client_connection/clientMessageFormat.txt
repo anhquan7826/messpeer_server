@@ -3,6 +3,12 @@ Clinet: INITIAL_MESSAGE:<username> <password_hash>
 Server: AUTHENTICATE_SUCCESS
         AUTHENTICATE_FAIL
 
+// Dùng khi client muon lay du lieu
+Client: GET_GROUPCHAT_LIST
+Server: GET_GROUPCHAT_LIST_OK:<group_id1> <group_id2> ...
+        GET_GROUPCHAT_LIST_ERROR
+
+
 // dùng khi client muốn quản lí group chat
 Client: GROUP_CHAT_CREATE:<name>
 Server: GROUP_CHAT_CREATE:SUCCESS:<name> <group_chat_id>

@@ -12,7 +12,7 @@ Server: GET_GROUPCHAT_LIST_OK:<group_id1> <group_id2> ...
 // dùng khi client muốn quản lí group chat
 Client: GROUP_CHAT_CREATE:<name>
 Server: GROUP_CHAT_CREATE:SUCCESS:<name> <group_chat_id>
-        GROUP_CHAT_CREATE:FAILED:<name> <group_chat_id>
+        GROUP_CHAT_CREATE:FAILED
 
 Client: GROUP_CHAT_ADD:<username> <group_chat_id>
 Server: GROUP_CHAT_ADD:SUCCESS:<username> <group_chat_id>
@@ -31,7 +31,7 @@ Server: GROUP_CHAT_DELETE:SUCCESS:<group_chat_id>
         GROUP_CHAT_DELETE:FAILED:<group_chat_id>
 
 // dùng khi client gửi tin nhắn
-SEND_MESSAGE:<username> <group_chat_id> <message_object>
+SEND_MESSAGE:<message_object>
 
 // dùng khi client nhận tin nhắn
 RECEIVE_MESSAGE:<username> <group_chat_id> <message_object>

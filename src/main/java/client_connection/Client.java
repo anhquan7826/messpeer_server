@@ -1,6 +1,6 @@
 package client_connection;
 
-import database.DbObject;
+import database.Database;
 import utils.Json;
 
 import java.io.BufferedReader;
@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class Client {
+    private HashSet<Client> clientList;
     private Socket socket;
     private BufferedReader bufferedReader;
     private PrintWriter printWriter;
@@ -18,8 +21,9 @@ public class Client {
     private boolean clientConnected;
     private boolean clientAuthenticated;
 
-    public Client(Socket socket) throws IOException {
+    public Client(Socket socket, HashSet<Client> clientList) throws IOException {
         this.socket = socket;
+        this.clientList = clientList;
         setUsername(socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
         clientConnected = true;
         clientAuthenticated = false;
@@ -35,11 +39,12 @@ public class Client {
                         else continue;
                         initMessage = initMessage.replaceFirst("INITIAL_MESSAGE:", "");
                         HashMap<String, String> credential = Json.toHashMap(initMessage);
-                        clientAuthenticated = DbObject.getInstance().authenticate(credential);
+                        clientAuthenticated = Database.getInstance().authenticate(credential);
                         if (clientAuthenticated) {
                             System.out.println(username + ": Authenticate success!");
                             sendMessage("AUTHENTICATE_SUCCESS");
                             setUsername(credential.get("username"));
+                            getAllMessages();
                             startCommunicate();
                         } else {
                             System.out.println(username + ": Authenticate failed!");
@@ -119,16 +124,28 @@ public class Client {
                             else continue;
 
                             String messageHeader = message.split(":")[0];
+                            message = message.replaceFirst(messageHeader + ":", "");
                             if ("SEND_MESSAGE".equals(messageHeader)) {
-                                // TODO: send message
+                                HashMap<String, String> msgJson = Json.toHashMap(message);
+                                for (String user : Database.getInstance().getUsers(msgJson.get("group_id"))) {
+                                    for (Client client : clientList) {
+                                        if (!user.equals(username) && client.getUsername().equals(user)) {
+                                            client.sendMessage("RECEIVE_MESSAGE:" + message);
+                                        }
+                                    }
+                                }
+                                Database.getInstance().sendMessageToGroup(msgJson);
+
                             } else if ("GET_GROUPCHAT_LIST".equals(messageHeader)) {
-                                HashMap<String, String> groupList = DbObject.getInstance().getGroupList(username);
+                                HashMap<String, String> groupList = Database.getInstance().getGroupList(username);
                                 if (groupList == null) {
                                     sendMessage("GET_GROUPCHAT_LIST_ERROR");
                                 } else {
                                     sendMessage("GET_GROUPCHAT_LIST_OK:" + Json.toJson(groupList));
                                 }
+
                             } else if ("GROUP_CHAT_CREATE".equals(messageHeader)) {
+
                             } else if ("GROUP_CHAT_ADD".equals(messageHeader)) {
                             } else if ("GROUP_CHAT_KICK".equals(messageHeader)) {
                             } else if ("GROUP_CHAT_CHANGE_HOST".equals(messageHeader)) {
@@ -137,9 +154,29 @@ public class Client {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                    }
+                    } else break;
                 }
             }
         }).start();
+    }
+
+    private void getAllMessages() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HashMap<String, String> groupList = Database.getInstance().getGroupList("anhquan7826");
+                for (String group_id : groupList.keySet()) {
+                    ArrayList<String> messages = Database.getInstance().getMessages(group_id, -1);
+                    messages.forEach((msg) -> {
+                        sendMessage("RECEIVE_MESSAGE:" + msg);
+                    });
+                }
+            }
+        }).start();
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
     }
 }
